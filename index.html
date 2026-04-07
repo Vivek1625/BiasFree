@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiasFree — AI Bias Detection</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Google Sans', Arial, sans-serif;
+            background: #f8f9fa;
+            color: #202124;
+        }
+        
+        .header {
+            background: white;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4285F4, #34A853);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+        
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #202124;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            color: #5f6368;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        
+        .upload-zone {
+            background: white;
+            border: 2px dashed #4285F4;
+            border-radius: 16px;
+            padding: 60px 40px;
+            max-width: 600px;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .upload-zone:hover {
+            background: #e8f0fe;
+            border-color: #1a73e8;
+        }
+        
+        .upload-icon { font-size: 48px; margin-bottom: 16px; }
+        
+        .upload-zone h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #1a73e8;
+        }
+        
+        .upload-zone p { color: #5f6368; font-size: 14px; }
+        
+        #fileInput { display: none; }
+        
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+        
+        .btn-primary:hover { background: #1557b0; }
+        .btn-primary:disabled { background: #9aa0a6; cursor: not-allowed; }
+        
+        /* Results Section */
+        .results {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: none;
+        }
+        
+        .fairness-score {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .score-number {
+            font-size: 72px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .score-high { color: #34A853; }
+        .score-medium { color: #FBBC04; }
+        .score-low { color: #EA4335; }
+        
+        .bias-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid #EA4335;
+        }
+        
+        .bias-card.medium { border-left-color: #FBBC04; }
+        .bias-card.low { border-left-color: #34A853; }
+        
+        .bias-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .bias-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .badge-high { background: #fce8e6; color: #c5221f; }
+        .badge-medium { background: #fef7e0; color: #b06000; }
+        .badge-low { background: #e6f4ea; color: #137333; }
+        
+        .group-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .group-stat {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .group-stat .rate {
+            font-size: 24px;
+            font-weight: 700;
+            color: #202124;
+        }
+        
+        .group-stat .label {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 4px;
+        }
+        
+        .gemini-card {
+            background: linear-gradient(135deg, #e8f0fe, #f0f4ff);
+            border-radius: 16px;
+            padding: 28px;
+            margin-top: 24px;
+            border: 1px solid #c5d4f5;
+        }
+        
+        .gemini-card h3 {
+            font-size: 18px;
+            color: #1a73e8;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .gemini-card p {
+            line-height: 1.7;
+            color: #202124;
+            white-space: pre-wrap;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e8eaed;
+            border-top: 4px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">BiasFree</div>
+    <span style="color:#5f6368; font-size:14px">Powered by Google Gemini</span>
+    <div id="authSection" style="margin-left:auto"></div>
+</div>
+
+<div class="hero">
+    <h1>Detect Hidden Bias<br>in Any Dataset</h1>
+    <p>Upload a CSV file and BiasFree will automatically find unfairness, 
+       explain it in plain English, and tell you how to fix it.</p>
+    
+    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📊</div>
+        <h3>Drop your CSV file here</h3>
+        <p>Supports hiring data, loan applications, admissions records, and more</p>
+        <p id="fileName" style="margin-top:12px; color:#1a73e8; font-weight:600"></p>
+    </div>
+    
+    <input type="file" id="fileInput" accept=".csv" onchange="handleFileSelect(event)">
+    <br>
+    <button class="btn-primary" id="analyzeBtn" onclick="analyzeBias()" disabled>
+        🔍 Analyze for Bias
+    </button>
+</div>
+
+<!-- Loading -->
+<div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p style="color:#5f6368">Analyzing your dataset with Google Gemini...</p>
+</div>
+
+<!-- Results -->
+<div class="results" id="results">
+    <div class="fairness-score">
+        <p style="font-size:16px; color:#5f6368; margin-bottom:8px">Overall Fairness Score</p>
+        <div class="score-number" id="scoreNumber">--</div>
+        <p style="color:#5f6368; margin-top:8px">out of 100</p>
+    </div>
+    
+    <div id="biasCards"></div>
+    
+    <div class="gemini-card">
+        <h3>✨ Gemini AI Analysis</h3>
+        <p id="geminiText">Loading Gemini explanation...</p>
+    </div>
+</div>
+
+<script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } 
+        from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+    // YOUR Firebase config — replace with yours from Firebase Console
+   const firebaseConfig = {
+  apiKey: "AIzaSyAs-Xl_59cRc79Das-ZEgElYtaF41PsnC8",
+  authDomain: "biasfree-642026.firebaseapp.com",
+  projectId: "biasfree-642026",
+  storageBucket: "biasfree-642026.firebasestorage.app",
+  messagingSenderId: "237763382673",
+  appId: "1:237763382673:web:ace9f0ee1f2ef330801e30",
+  measurementId: "G-T8EFZQNQ18"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Your Cloud Function URL (you get this after deploying)
+    const CLOUD_FUNCTION_URL = "YOUR_CLOUD_FUNCTION_URL/analyze_bias";
+
+    let selectedFile = null;
+    let currentUser = null;
+
+    // Auth state
+    onAuthStateChanged(auth, (user) => {
+        const authSection = document.getElementById("authSection");
+        if (user) {
+            currentUser = user;
+            authSection.innerHTML = `
+                <span style="color:#202124; font-size:14px">
+                    ${user.displayName}
+                </span>
+            `;
+        } else {
+            authSection.innerHTML = `
+                <button onclick="signIn()" style="
+                    background:#1a73e8; color:white; border:none; 
+                    padding:8px 16px; border-radius:6px; cursor:pointer;
+                    font-size:14px">
+                    Sign in with Google
+                </button>
+            `;
+        }
+    });
+
+    window.signIn = async () => {
+        await signInWithPopup(auth, provider);
+    };
+
+    window.handleFileSelect = (event) => {
+        selectedFile = event.target.files[0];
+        if (selectedFile) {
+            document.getElementById("fileName").textContent = 
+                `✅ Selected: ${selectedFile.name}`;
+            document.getElementById("analyzeBtn").disabled = false;
+        }
+    };
+
+    window.analyzeBias = async () => {
+        if (!selectedFile) return;
+
+        // Show loading
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("results").style.display = "none";
+        document.getElementById("analyzeBtn").disabled = true;
+
+        try {
+            // Send CSV to Cloud Function
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+
+            const response = await fetch(CLOUD_FUNCTION_URL, {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Display results
+                displayResults(data);
+
+                // Save to Firestore
+                if (currentUser) {
+                    await addDoc(collection(db, "analyses"), {
+                        userId: currentUser.uid,
+                        fileName: selectedFile.name,
+                        fairnessScore: data.overall_fairness_score,
+                        biasFindings: data.bias_analysis,
+                        geminiExplanation: data.gemini_explanation,
+                        timestamp: new Date()
+                    });
+                }
+            }
+        } catch (error) {
+            alert("Analysis failed: " + error.message);
+        } finally {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("analyzeBtn").disabled = false;
+        }
+    };
+
+    function displayResults(data) {
+        const results = document.getElementById("results");
+        results.style.display = "block";
+
+        // Show fairness score
+        const score = data.overall_fairness_score;
+        const scoreEl = document.getElementById("scoreNumber");
+        scoreEl.textContent = score;
+        scoreEl.className = "score-number " + 
+            (score >= 80 ? "score-high" : score >= 60 ? "score-medium" : "score-low");
+
+        // Show bias cards
+        const cardsContainer = document.getElementById("biasCards");
+        cardsContainer.innerHTML = "";
+
+        for (const [column, analysis] of Object.entries(data.bias_analysis)) {
+            const level = analysis.bias_level.toLowerCase();
+            const card = document.createElement("div");
+            card.className = `bias-card ${level}`;
+            
+            let groupStatsHTML = Object.entries(analysis.group_statistics)
+                .map(([group, stats]) => `
+                    <div class="group-stat">
+                        <div class="rate">${(stats.positive_rate * 100).toFixed(0)}%</div>
+                        <div class="label">${group}</div>
+                        <div class="label">${stats.count} records</div>
+                    </div>
+                `).join("");
+
+            card.innerHTML = `
+                <h3>📊 Column: <strong>${column}</strong></h3>
+                <span class="bias-badge badge-${level}">
+                    ${analysis.bias_level} BIAS
+                </span>
+                <p style="color:#5f6368; font-size:14px">
+                    Disparate Impact Ratio: 
+                    <strong>${analysis.disparate_impact_ratio}</strong>
+                    (threshold: 0.8 — below this indicates potential discrimination)
+                </p>
+                <div class="group-stats">${groupStatsHTML}</div>
+            `;
+            cardsContainer.appendChild(card);
+        }
+
+        // Show Gemini explanation
+        document.getElementById("geminiText").textContent = data.gemini_explanation;
+
+        // Scroll to results
+        results.scrollIntoView({ behavior: "smooth" });
+    }
+</script>
+
+</body>
+</html>

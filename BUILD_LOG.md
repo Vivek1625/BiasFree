@@ -14,3 +14,15 @@
 - Initialized local Git repository and pushed to GitHub.
 - Scaffolded Firebase Cloud Functions (Python environment).
 - Integrated `pandas` for data processing and `google-generativeai` for Gemini insights.
+
+### Day 4: Backend Logic Complete
+- Wrote complete Python Cloud Function in main.py
+- Implemented real CSV bias detection using pandas
+- Implemented Disparate Impact Ratio (80% Rule) calculation
+- Auto-detection of sensitive columns (gender, race, age, caste, etc.)
+- Auto-detection of outcome column (hired, approved, income, etc.)
+- Integrated Gemini API for plain-English bias explanations
+- Added Suggested Fixes panel to frontend
+- Added error handling and dataset info display
+- Cleaned up project: removed script.js, config.js, firebase.js, style.css
+- CLOUD_FUNCTION_URL updated to live deployed URL

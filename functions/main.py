@@ -1,4 +1,5 @@
-import functions_framework
+from firebase_functions import https_fn
+from firebase_functions.params import SecretParam
 import pandas as pd
 import numpy as np
 import json
@@ -9,8 +10,8 @@ from flask import jsonify
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-@functions_framework.http
-def analyze_bias(request):
+@https_fn.on_request(secrets=["GEMINI_API_KEY"])
+def analyze_bias(request: https_fn.Request) -> https_fn.Response:
     if request.method == "OPTIONS":
         headers = {
             "Access-Control-Allow-Origin": "*",
@@ -46,16 +47,20 @@ def analyze_bias(request):
         ]
 
         outcome_keywords = [
-            "hired", "approved", "accepted", "outcome", "decision",
-            "result", "label", "target", "income", "loan", "admit",
-            "selected", "promoted", "passed", "status", "class"
-        ]
+    "income", "salary", "hired", "approved", "accepted", "outcome", 
+    "decision", "result", "label", "target", "loan", "admit",
+    "selected", "promoted", "passed"
+]
         outcome_col = None
         for col in df.columns:
-            if any(keyword in col.lower() for keyword in outcome_keywords):
+            if any(col.lower() == keyword for keyword in outcome_keywords):
                 outcome_col = col
                 break
-
+        if not outcome_col:
+            for col in df.columns:
+                if any(keyword in col.lower() for keyword in outcome_keywords):
+                    outcome_col = col
+                    break
         if not outcome_col:
             outcome_col = df.columns[-1]
 

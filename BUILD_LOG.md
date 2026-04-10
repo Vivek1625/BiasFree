@@ -26,3 +26,20 @@
 - Added error handling and dataset info display
 - Cleaned up project: removed script.js, config.js, firebase.js, style.css
 - CLOUD_FUNCTION_URL updated to live deployed URL
+
+## Day 5: Debugging & Cloud Upgrade
+- Diagnosed Gemini 404 error with model name format
+- Upgraded Google Cloud account to Tier 1 Postpay billing
+- Set GEMINI_API_KEY secret in Firebase Secret Manager
+- Multiple deploy attempts to fix Gemini integration
+- Identified root cause: google-generativeai SDK fully deprecated
+
+## Day 6 & 7: SDK Migration & Bug Fixes
+- Migrated from google-generativeai to google-genai SDK
+- Updated requirements.txt: replaced google-generativeai==0.5.4 with google-genai
+- Rewrote get_gemini_explanation() using new google.genai.Client API
+- Model updated to gemini-2.0-flash
+- Fixed outcome column auto-detection bug (was picking Loan_ID instead of Loan_Status)
+- Implemented keyword scoring + low cardinality heuristic for correct outcome detection
+- Submitted Google Cloud billing account verification (PAN + utility bill)
+- Pushed all fixes to GitHub

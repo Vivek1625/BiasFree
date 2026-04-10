@@ -67,3 +67,13 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Project & Python ignores
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+Terminal Saved Output*.txt
+scratch/
+biasfree-functions/

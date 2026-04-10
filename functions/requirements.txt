@@ -1,5 +1,5 @@
 firebase-functions>=0.5.0
 pandas==2.2.2
 numpy==1.26.4
-google-generativeai==0.8.3
+google-genai
 flask==3.0.3

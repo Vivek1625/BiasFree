@@ -34,12 +34,22 @@
 - Multiple deploy attempts to fix Gemini integration
 - Identified root cause: google-generativeai SDK fully deprecated
 
-## Day 6 & 7: SDK Migration & Bug Fixes
+## Day 6 & 7: SDK Migration & Baseline Fixes
 - Migrated from google-generativeai to google-genai SDK
 - Updated requirements.txt: replaced google-generativeai==0.5.4 with google-genai
 - Rewrote get_gemini_explanation() using new google.genai.Client API
-- Model updated to gemini-2.0-flash
 - Fixed outcome column auto-detection bug (was picking Loan_ID instead of Loan_Status)
 - Implemented keyword scoring + low cardinality heuristic for correct outcome detection
 - Submitted Google Cloud billing account verification (PAN + utility bill)
-- Pushed all fixes to GitHub
+
+## Day 8: Gemini Model Optimization & Quota Handling
+- Transitioned core model integration initially to gemini-2.0-flash and gemini-2.0-flash-lite
+- Encountered and root-caused `429 RESOURCE_EXHAUSTED` free-tier quota constraints
+- Designed and implemented a dynamic multi-model fallback strategy to prevent downtime
+- Configured Cloud Function to recursively cycle through models dynamically upon API rejection
+
+## Day 9: 2026 Suite Upgrade & Observability
+- Resolved `404 NOT_FOUND` deployment bugs caused by deprecated legacy models (gemini-1.5-pro)
+- Upgraded the AI failover array to the current 2026 suite (`gemini-3.1-flash-lite`, `gemini-3.0-flash`, `gemini-2.5-flash`, `gemini-2.0-flash`)
+- Enhanced AI error handling by writing custom JSON parsing to trace and accumulate granular errors across all model attempts
+- Pushed final production-ready code fixes to GitHub

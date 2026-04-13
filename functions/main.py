@@ -36,36 +36,93 @@ def analyze_bias(request: https_fn.Request) -> https_fn.Response:
             "religion", "nationality", "disability", "caste",
             "region", "marital", "color", "colour"
         ]
-        sensitive_cols = [
-            col for col in df.columns
-            if any(keyword in col.lower() for keyword in sensitive_keywords)
-        ]
 
-        def detect_outcome_column(df):
+        def detect_outcome_column(df, sensitive_keywords):
             exclude_patterns = ['id', '_id', 'index', 'no', 'number', 'num', 'code']
-            outcome_keywords = ['status', 'approved', 'hired', 'income', 'loan', 'target', 'label', 'outcome', 'result', 'decision']
+            outcome_keywords = [
+                'status', 'approved', 'hired', 'income', 'loan', 'target', 
+                'label', 'outcome', 'result', 'decision', 'salary', 'wage', 
+                'pay', 'earning', 'revenue', 'profit', 'loss', 'pass', 'fail', 
+                'win', 'lose', 'graduate', 'dropout', 'recidivism', 'parole', 
+                'bail', 'sentence'
+            ]
+            
+            outcome_like_values = {
+                'yes', 'no', 'true', 'false', '0', '1', 'approved', 'rejected', 
+                'hired', 'fired', '<=50k', '>50k', 'y', 'n'
+            }
             
             candidates = []
-            for col in df.columns:
+            total_cols = len(df.columns)
+            for i, col in enumerate(df.columns):
                 col_lower = col.lower()
+                
+                # Rule 6: Sensitive columns completely excluded
+                if any(keyword in col_lower for keyword in sensitive_keywords):
+                    continue
+                    
                 if any(pat in col_lower for pat in exclude_patterns):
                     continue
-                unique_ratio = df[col].nunique() / len(df)
-                if unique_ratio < 0.05:
-                    score = sum(1 for kw in outcome_keywords if kw in col_lower)
-                    candidates.append((col, score, unique_ratio))
+                
+                num_unique = df[col].nunique()
+                if num_unique < 2:
+                    continue
+                    
+                unique_values = set(str(v).strip().lower() for v in df[col].dropna().unique())
+                has_outcome_values = any(v in outcome_like_values for v in unique_values)
+                
+                # Rule 3: Reject non-binary without outcome values
+                if num_unique > 2 and not has_outcome_values:
+                    continue
+                    
+                score = 0
+                
+                # Rule 1: Binary columns get +5
+                if num_unique == 2:
+                    score += 5
+                    
+                # Rule 2: Keyword match +2 per hit
+                for kw in outcome_keywords:
+                    if kw in col_lower:
+                        score += 2
+                        
+                # Rule 4: Values match outcome-like strings +4
+                if has_outcome_values:
+                    score += 4
+                    
+                # Rule 5: Position bonus
+                position_from_end = total_cols - i
+                if position_from_end == 1:
+                    score += 3
+                elif position_from_end == 2:
+                    score += 2
+                elif position_from_end == 3:
+                    score += 1
+                    
+                candidates.append((col, score))
             
             if candidates:
                 candidates.sort(key=lambda x: x[1], reverse=True)
                 return candidates[0][0]
             return None
 
-        outcome_col = detect_outcome_column(df)
+        outcome_col = detect_outcome_column(df, sensitive_keywords)
         if not outcome_col:
             outcome_col = df.columns[-1]
 
-        if not sensitive_cols:
-            sensitive_cols = [col for col in df.columns if col != outcome_col][:3]
+        def detect_sensitive_columns(df, outcome_column, sensitive_keywords):
+            cols = []
+            for col in df.columns:
+                if col == outcome_column:
+                    continue
+                if any(keyword in col.lower() for keyword in sensitive_keywords):
+                    cols.append(col)
+            
+            if not cols:
+                cols = [col for col in df.columns if col != outcome_column][:3]
+            return cols
+
+        sensitive_cols = detect_sensitive_columns(df, outcome_col, sensitive_keywords)
 
         bias_results = {}
 
@@ -182,13 +239,53 @@ Provide exactly 4 sections:
 
 
 def get_gemini_explanation(prompt):
+    models = [
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite"
+    ]
+    
     try:
         from google import genai
+        import time
         client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt
-        )
-        return response.text
+        
+        errors = []
+        for model in models:
+            retries = 5
+            for attempt in range(retries):
+                try:
+                    response = client.models.generate_content(
+                        model=model,
+                        contents=prompt
+                    )
+                    return response.text
+                except Exception as e:
+                    error_str = str(e)
+                    try:
+                        import json
+                        if "{" in error_str:
+                            err_json = error_str[error_str.find("{"):]
+                            err_dict = json.loads(err_json)
+                            msg = err_dict.get("error", {}).get("message", error_str)
+                            code = err_dict.get("error", {}).get("code", 500)
+                        else:
+                            msg = error_str
+                            code = 500
+                    except:
+                        msg = error_str
+                        code = 500
+                    
+                    if code == 503 and attempt < retries - 1:
+                        backoff = 2 ** attempt
+                        print(f"Warning: Model {model} returned 503. Retrying in {backoff} seconds...")
+                        time.sleep(backoff)
+                        continue
+                        
+                    print(f"Warning: Model {model} failed - {msg}")
+                    errors.append(f"[{model}]: {code} - {msg}")
+                    break # Break out of retry loop on non-503 or max retries, move to next model
+                
+        return "Gemini explanation unavailable. All models failed. Errors: " + " | ".join(errors)
     except Exception as e:
-        return f"Gemini explanation unavailable: {str(e)}"
+        return f"Gemini config error: {str(e)}"

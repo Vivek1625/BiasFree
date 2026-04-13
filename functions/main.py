@@ -34,7 +34,7 @@ def analyze_bias(request: https_fn.Request) -> https_fn.Response:
         sensitive_keywords = [
             "gender", "sex", "race", "ethnicity", "age",
             "religion", "nationality", "disability", "caste",
-            "region", "marital", "color", "colour"
+            "region", "color", "colour"
         ]
 
         def detect_outcome_column(df, sensitive_keywords):
@@ -115,6 +115,11 @@ def analyze_bias(request: https_fn.Request) -> https_fn.Response:
             for col in df.columns:
                 if col == outcome_column:
                     continue
+                
+                # Skip raw age columns with too many unique values
+                if 'age' in col.lower() and df[col].nunique() > 15:
+                    continue
+                    
                 if any(keyword in col.lower() for keyword in sensitive_keywords):
                     cols.append(col)
             

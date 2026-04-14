@@ -246,6 +246,7 @@ Provide exactly 4 sections:
 def get_gemini_explanation(prompt):
     models = [
         "gemini-2.5-flash",
+        "gemini-3.1-flash-lite-preview",
         "gemini-2.0-flash",
         "gemini-2.0-flash-lite"
     ]

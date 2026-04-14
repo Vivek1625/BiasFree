@@ -53,3 +53,6 @@
 - Upgraded the AI failover array to the current 2026 suite (`gemini-3.1-flash-lite`, `gemini-3.0-flash`, `gemini-2.5-flash`, `gemini-2.0-flash`)
 - Enhanced AI error handling by writing custom JSON parsing to trace and accumulate granular errors across all model attempts
 - Pushed final production-ready code fixes to GitHub
+
+## Day 10: Model Fallback Sequence Optimization
+- Added `gemini-3.1-flash-lite-preview` to the model fallback sequence in `main.py` to ensure the latest preview models are prioritized.

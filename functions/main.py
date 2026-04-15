@@ -5,7 +5,7 @@ import json
 import os
 from flask import jsonify
 
-@https_fn.on_request(secrets=["GEMINI_API_KEY"])
+@https_fn.on_request()
 def analyze_bias(request: https_fn.Request) -> https_fn.Response:
     if request.method == "OPTIONS":
         headers = {
@@ -245,10 +245,10 @@ Provide exactly 4 sections:
 
 def get_gemini_explanation(prompt):
     models = [
-        "gemini-2.5-flash",
-        "gemini-3.1-flash-lite-preview",
-        "gemini-2.0-flash",
-        "gemini-2.0-flash-lite"
+        "gemini-3.1-flash-lite",
+        "gemini-3-flash",
+        "gemini-3.1-pro",
+        "gemini-2.5-flash"
     ]
     
     try:

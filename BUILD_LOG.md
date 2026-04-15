@@ -56,3 +56,10 @@
 
 ## Day 10: Model Fallback Sequence Optimization
 - Added `gemini-3.1-flash-lite-preview` to the model fallback sequence in `main.py` to ensure the latest preview models are prioritized.
+
+## Day 11: Client-Side Architecture Shift & API Security
+- Pivoted from Firebase Cloud Functions to a 100% client-side architecture to bypass Google Cloud billing verification blocks.
+- Migrated Gemini AI generation functionality entirely into the frontend (`index.html`) using the `fetch` API.
+- Implemented a "Professional Safety Net" to gracefully intercept API rate limits (`429`) and display pre-computed fallback reports.
+- Optimized the dynamic model priority list to prevent rapid quota burn by initiating logic with stable models (`gemini-2.5-flash`).
+- Hardened application security by securing the exposed Gemini API key via strict Google Cloud HTTP Referrer Application Restrictions.

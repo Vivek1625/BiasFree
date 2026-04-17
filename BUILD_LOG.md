@@ -63,3 +63,8 @@
 - Implemented a "Professional Safety Net" to gracefully intercept API rate limits (`429`) and display pre-computed fallback reports.
 - Optimized the dynamic model priority list to prevent rapid quota burn by initiating logic with stable models (`gemini-2.5-flash`).
 - Hardened application security by securing the exposed Gemini API key via strict Google Cloud HTTP Referrer Application Restrictions.
+
+## Day 12: API Security & Config Separation
+- Resolved Google Cloud API leakage block by extracting the Gemini API key from the public HTML files.
+- Implemented a two-step client-side security architecture utilizing a `.gitignore`d `config.js` file to safely inject sensitive credentials at runtime.
+- Prevented future GitHub secret detection bots from automatically revoking the API key while maintaining a static, serverless deployment architecture.

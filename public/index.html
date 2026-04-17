@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="config.js"></script>
 
     <style>
         *,
@@ -780,8 +781,8 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // CONFIGURATION (Change your Gemini API Key here)
-        const GEMINI_API_KEY = "AIzaSyBN67WZ1pPQxY3YfNk5oVlqnatR517n9BE";
+        // CONFIGURATION (API Key is loaded securely from config.js)
+        const GEMINI_API_KEY = window.GEMINI_API_KEY;
 
         const SENSITIVE_KEYWORDS = [
             "gender", "sex", "race", "ethnicity", "age",

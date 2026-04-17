@@ -77,3 +77,7 @@ __pycache__/
 Terminal Saved Output*.txt
 scratch/
 biasfree-functions/
+
+# API Keys
+config.js
+public/config.js

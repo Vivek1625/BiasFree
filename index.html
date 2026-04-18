@@ -408,6 +408,88 @@
             margin-right: auto;
         }
 
+        .score-legend {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .score-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 20px;
+        }
+
+        .legend-high { background: var(--green-light); color: #137333; }
+        .legend-medium { background: var(--yellow-light); color: #b06000; }
+        .legend-low { background: var(--red-light); color: #c5221f; }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .score-verdict {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 12px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .score-gauge {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            height: 14px;
+            border-radius: 7px;
+            margin: 20px auto 6px;
+            background: linear-gradient(90deg, #EA4335 0%, #EA4335 59%, #FBBC04 60%, #FBBC04 79%, #34A853 80%, #34A853 100%);
+            overflow: visible;
+        }
+
+        .gauge-marker {
+            position: absolute;
+            top: -6px;
+            width: 4px;
+            height: 26px;
+            background: var(--text-primary);
+            border-radius: 2px;
+            transform: translateX(-50%);
+            transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+
+        .gauge-marker::after {
+            content: attr(data-score);
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .gauge-labels {
+            display: flex;
+            justify-content: space-between;
+            max-width: 420px;
+            margin: 0 auto;
+            font-size: 10px;
+            color: var(--text-tertiary);
+            font-weight: 600;
+        }
+
         /* === BIAS CARDS === */
         .bias-card {
             background: var(--card-bg);
@@ -526,8 +608,42 @@
         .gemini-card .content {
             line-height: 1.8;
             color: var(--text-primary);
-            white-space: pre-wrap;
             font-size: 14px;
+        }
+
+        .gemini-card .content h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--blue);
+            margin: 18px 0 6px;
+        }
+
+        .gemini-card .content h3:first-child {
+            margin-top: 0;
+        }
+
+        .gemini-card .content p {
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .gemini-card .content ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .gemini-card .content li {
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .gemini-card .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .gemini-card .content em {
+            font-style: italic;
         }
 
         /* === FIXES CARD === */
@@ -597,6 +713,64 @@
             text-decoration: underline;
         }
 
+        /* === PRINT STYLES (PDF Report) === */
+        @media print {
+            body { background: white; color: #000; font-size: 11pt; }
+            .header, .hero, .loading, .footer, .sdg-banner,
+            #analyzeBtn, .upload-zone, .error-msg, .btn-download-report,
+            .score-gauge, .gauge-labels { display: none !important; }
+            .results { display: block !important; margin: 0; padding: 0; max-width: 100%; }
+            .results * { break-inside: avoid; }
+            .print-header { display: block !important; text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #4285F4; }
+            .print-header h1 { font-size: 22pt; color: #202124; margin-bottom: 4px; }
+            .print-header p { font-size: 10pt; color: #5f6368; }
+            .fairness-score { box-shadow: none; border: 2px solid #e8eaed; padding: 20px; }
+            .bias-card { box-shadow: none; border: 1px solid #e8eaed; page-break-inside: avoid; }
+            .gemini-card { box-shadow: none; border: 1px solid #4285F4; background: #f8f9ff; }
+            .fixes-card { box-shadow: none; border: 1px solid #34A853; }
+            .score-verdict { border: 1px solid currentColor; }
+            .dataset-info { background: #f8f9fa; border: 1px solid #e8eaed; }
+            /* Project mission section */
+            div[style*="border-top: 1px solid"] { display: none !important; }
+        }
+
+        .print-header { display: none; }
+
+        .btn-download-report {
+            background: linear-gradient(135deg, #34A853, #137333);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 14px rgba(52, 168, 83, 0.3);
+            display: none;
+        }
+
+        .btn-download-report:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 168, 83, 0.4);
+        }
+
+        .history-link {
+            color: var(--blue);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            transition: background 0.2s;
+        }
+
+        .history-link:hover {
+            background: var(--blue-light);
+        }
+
         /* === RESPONSIVE === */
         @media (max-width: 640px) {
             .hero h1 {
@@ -633,6 +807,7 @@
     <div class="header">
         <div class="logo">BiasFree</div>
         <span class="powered-by"><span class="gemini-icon"></span> Powered by Google Gemini</span>
+        <a href="history.html" class="history-link" id="historyLink" style="display:none">📊 History</a>
         <div id="authSection"></div>
     </div>
 
@@ -640,6 +815,7 @@
     <div class="hero">
         <div class="badge">🎯 UN SDG 10: Reduced Inequalities</div>
         <h1>Detect Hidden Bias<br>in <span>Any Dataset</span></h1>
+        <p style="font-size: 15px; color: var(--blue); font-weight: 600; margin-bottom: 8px; letter-spacing: -0.2px;">The only bias detector that explains results in plain English — no data science degree required.</p>
         <p>Upload a CSV file and BiasFree will automatically find unfairness, explain it in plain English using Gemini
             AI, and tell you exactly how to fix it.</p>
 
@@ -697,8 +873,13 @@
             <p class="score-label">Overall Fairness Score</p>
             <div class="score-number" id="scoreNumber">--</div>
             <p class="score-out-of">out of 100</p>
+            <div class="score-gauge" id="scoreGauge">
+                <div class="gauge-marker" id="gaugeMarker" style="left:50%" data-score=""></div>
+            </div>
+            <div class="gauge-labels"><span>0 — High Bias</span><span>60</span><span>80</span><span>100 — Fair</span></div>
             <p class="score-desc">Based on the 80% Rule (Four-Fifths Rule) — the industry standard for detecting
                 discrimination in datasets</p>
+            <div id="scoreVerdict" class="score-verdict" style="display:none"></div>
         </div>
 
         <div id="biasCards"></div>
@@ -717,6 +898,16 @@
         <div class="sdg-banner">
             <p>🌍 BiasFree supports <strong>UN Sustainable Development Goal 10: Reduced Inequalities</strong><br>
                 Specifically SDG 10.3 — Ensure equal opportunity and reduce inequalities of outcome</p>
+        </div>
+
+        <!-- Print header (only visible when printing) -->
+        <div class="print-header">
+            <h1>BiasFree — Bias Analysis Report</h1>
+            <p>Generated on <span id="printDate"></span> · Powered by Google Gemini AI</p>
+        </div>
+
+        <div style="text-align:center">
+            <button class="btn-download-report" id="downloadReportBtn" onclick="generateReport()">📄 Download Report as PDF</button>
         </div>
     </div>
 
@@ -742,9 +933,8 @@
                     </div>
                     <div
                         style="background: white; padding: 20px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); flex: 1;">
-                        <h4 style="font-size: 13px; color: var(--green); margin-bottom: 8px;">Privacy First</h4>
-                        <p style="font-size: 12px; color: var(--text-secondary);">Client-side architecture ensures
-                            sensitive data never leaves your device.</p>
+                        <h4 style="font-size: 13px; color: var(--green); margin-bottom: 8px;">Privacy by Design</h4>
+                        <p style="font-size: 12px; color: var(--text-secondary);">Raw data is processed locally in your browser. Only anonymized statistical summaries are sent to Gemini AI for explanation.</p>
                     </div>
                 </div>
             </div>
@@ -755,7 +945,7 @@
     <div class="footer">
         <p>Built with ❤️ for the <a href="https://developers.google.com/community/gdsc-solution-challenge"
                 target="_blank">Google Solutions Challenge 2026</a></p>
-        <p style="margin-top: 10px; opacity: 0.7;">Firebase · Google Gemini AI · Google Cloud · UN SDG 10</p>
+        <p style="margin-top: 10px; opacity: 0.7;">Firebase Hosting & Auth · Google Gemini AI · Firestore · UN SDG 10</p>
     </div>
 
     <script type="module">
@@ -787,7 +977,10 @@
         const SENSITIVE_KEYWORDS = [
             "gender", "sex", "race", "ethnicity", "age",
             "religion", "nationality", "disability", "caste",
-            "region", "color", "colour"
+            "region", "color", "colour",
+            "marital", "married", "marriage", "veteran",
+            "pregnant", "orientation", "lgbtq",
+            "department", "jobrole", "job_role", "joblevel", "job_level"
         ];
 
         const POSITIVE_VALUES = [
@@ -1059,22 +1252,86 @@
         }
 
         /**
-         * Generate human-readable fix suggestions.
+         * Generate dataset-specific, quantified fix suggestions.
          */
         function generateFixes(biasResults) {
             const fixes = [];
             for (const [col, result] of Object.entries(biasResults)) {
+                const stats = result.group_statistics;
+                const advGroup = result.most_advantaged_group;
+                const disGroup = result.most_disadvantaged_group;
+                const advRate = stats[advGroup] ? (stats[advGroup].positive_rate * 100).toFixed(1) : '?';
+                const disRate = stats[disGroup] ? (stats[disGroup].positive_rate * 100).toFixed(1) : '?';
+                const advCount = stats[advGroup] ? stats[advGroup].count : 0;
+                const disCount = stats[disGroup] ? stats[disGroup].count : 0;
+                const ratio = advCount > 0 && disCount > 0 ? Math.round(advCount / disCount) : 0;
+                const dir = result.disparate_impact_ratio;
+                const targetScore = Math.min(85, Math.round(dir * 100) + 20);
+
                 if (result.bias_level === "HIGH") {
-                    fixes.push(`Remove or anonymize the '${col}' column before training your model`);
-                    fixes.push(`Apply re-weighting to give '${result.most_disadvantaged_group}' group equal representation`);
+                    fixes.push(`<strong>${col}:</strong> The '${disGroup}' group has a ${disRate}% positive outcome rate vs ${advRate}% for '${advGroup}' — a ${(advRate - disRate).toFixed(1)} percentage-point gap.`);
+                    if (ratio > 2) {
+                        fixes.push(`Resample the dataset to reduce the ${advGroup}/${disGroup} representation ratio from ${ratio}:1 to under 3:1. This alone could push the fairness score above ${targetScore}.`);
+                    }
+                    fixes.push(`Before model training, blind the '${col}' column and verify predictions remain consistent. If outcomes shift >5%, the column is a proxy for bias.`);
                 } else if (result.bias_level === "MEDIUM") {
-                    fixes.push(`Monitor '${col}' closely and consider fairness constraints during model training`);
+                    fixes.push(`<strong>${col}:</strong> Slight disparity detected — '${disGroup}' outcomes are ${disRate}% vs '${advGroup}' at ${advRate}%. Add fairness constraints (e.g., equalized odds) during model training to prevent this gap from widening.`);
                 }
             }
             if (fixes.length === 0) {
-                fixes.push("Dataset appears relatively fair across detected sensitive columns. Continue monitoring with new data.");
+                fixes.push("Dataset appears relatively fair across detected sensitive columns. Continue monitoring as new data is collected to catch drift over time.");
             }
             return fixes;
+        }
+
+        // ============================================================
+        //  MARKDOWN → HTML  (lightweight renderer for Gemini output)
+        // ============================================================
+        function markdownToHTML(text) {
+            if (!text) return '';
+            // Escape HTML special chars first
+            let html = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            // ### Heading 3
+            html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+            // ## Heading 2
+            html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>');
+            // # Heading 1
+            html = html.replace(/^# (.+)$/gm, '<h3>$1</h3>');
+
+            // **bold**
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            // *italic* or _italic_
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+
+            // Bullet points (- item or * item)
+            // Split into lines and convert consecutive bullets into <ul>
+            const lines = html.split('\n');
+            const result = [];
+            let inList = false;
+            for (const line of lines) {
+                const bulletMatch = line.match(/^[\*\-] (.+)$/);
+                if (bulletMatch) {
+                    if (!inList) { result.push('<ul>'); inList = true; }
+                    result.push(`<li>${bulletMatch[1]}</li>`);
+                } else {
+                    if (inList) { result.push('</ul>'); inList = false; }
+                    // Wrap non-empty, non-heading lines in <p>
+                    const trimmed = line.trim();
+                    if (trimmed && !trimmed.startsWith('<h3>') && !trimmed.startsWith('<ul>') && !trimmed.startsWith('</ul>') && !trimmed.startsWith('<li>')) {
+                        result.push(`<p>${trimmed}</p>`);
+                    } else if (trimmed) {
+                        result.push(trimmed);
+                    }
+                }
+            }
+            if (inList) result.push('</ul>');
+
+            return result.join('\n');
         }
 
         // ============================================================
@@ -1085,8 +1342,7 @@
                 "gemini-3-flash-preview",
                 "gemini-3.1-flash-lite-preview",
                 "gemini-2.5-flash",
-                "gemini-2.0-flash",
-                "gemini-1.5-flash"
+                "gemini-2.0-flash"
             ];
 
             let lastError = "Unknown error";
@@ -1198,43 +1454,60 @@
                 });
 
                 // Step 8: Call Gemini API (async, non-blocking)
-                const prompt = `Analyze this AI bias detection result and explain it in plain English.
+                const prompt = `You are analyzing a DATASET for bias — not a trained model. Explain the statistical bias findings below in plain English that a non-technical person (e.g., an HR manager or compliance officer) can understand and act on.
+
+IMPORTANT: This analysis examines the dataset itself. Any model trained on this data may learn to reproduce the biased patterns found. Frame all findings as properties of the data, not of a model.
 
 Dataset: ${data.length} rows
 Outcome column: ${outcomeCol}
 Sensitive columns: ${sensitiveCols.join(", ")}
-Fairness score: ${fairnessScore}/100
+Fairness score: ${fairnessScore}/100 (80+ = fair, 60-79 = moderate bias, below 60 = high bias)
 
 Bias results:
 ${JSON.stringify(biasResults, null, 2)}
 
 Provide exactly 4 sections:
-1. Summary - What did we find?
-2. What This Means - Plain English explanation
-3. Root Causes - Why does this bias exist?
-4. How To Fix It - Concrete actionable steps`;
+1. Summary - What did we find in this dataset?
+2. What This Means - Plain English: who is disadvantaged and by how much? Use specific numbers.
+3. Root Causes - Why might this bias exist in the data collection or historical process?
+4. What To Do Next - Concrete, non-technical actions (e.g., "audit your hiring pipeline for the past 2 years", "request demographic breakdowns from your data provider"). Avoid ML jargon.`;
 
                 const geminiText = document.getElementById("geminiText");
                 geminiText.textContent = "⏳ Generating AI explanation with Google Gemini...";
 
                 getGeminiExplanation(prompt).then(explanation => {
-                    geminiText.textContent = explanation;
+                    geminiText.innerHTML = markdownToHTML(explanation);
                 });
 
                 // Step 9: Save to Firestore if logged in
                 if (currentUser) {
                     try {
+                        // Compute a top-level bias level for history display
+                        const biasKeys = Object.keys(biasResults);
+                        let topBiasLevel = 'FAIR';
+                        if (biasKeys.some(k => biasResults[k].bias_level === 'HIGH')) topBiasLevel = 'HIGH';
+                        else if (biasKeys.some(k => biasResults[k].bias_level === 'MEDIUM')) topBiasLevel = 'MEDIUM';
+
                         await addDoc(collection(db, "analyses"), {
                             userId: currentUser.uid,
                             fileName: selectedFile.name,
                             fairnessScore: fairnessScore,
+                            biasLevel: topBiasLevel,
                             biasFindings: biasResults,
                             suggestedFixes: fixes,
                             datasetSummary: {
                                 total_rows: data.length,
+                                total_columns: columns.length,
                                 outcome_column: outcomeCol,
                                 sensitive_columns: sensitiveCols
                             },
+                            columnResults: biasKeys.map(k => ({
+                                column: k,
+                                bias_level: biasResults[k].bias_level,
+                                disparate_impact: biasResults[k].disparate_impact_ratio,
+                                disadvantaged: biasResults[k].most_disadvantaged_group,
+                                advantaged: biasResults[k].most_advantaged_group
+                            })),
                             timestamp: new Date()
                         });
                     } catch (e) {
@@ -1279,6 +1552,24 @@ Provide exactly 4 sections:
             scoreEl.textContent = score;
             scoreEl.className = "score-number " +
                 (score >= 80 ? "score-high" : score >= 60 ? "score-medium" : "score-low");
+
+            // Gauge marker
+            const marker = document.getElementById("gaugeMarker");
+            marker.style.left = score + '%';
+            marker.setAttribute('data-score', score);
+
+            // Score verdict
+            const verdictEl = document.getElementById("scoreVerdict");
+            if (score >= 80) {
+                verdictEl.textContent = "✅ This dataset meets fairness standards";
+                verdictEl.style.cssText = "display:inline-block;background:var(--green-light);color:#137333;";
+            } else if (score >= 60) {
+                verdictEl.textContent = "⚠️ Moderate bias detected — review recommended";
+                verdictEl.style.cssText = "display:inline-block;background:var(--yellow-light);color:#b06000;";
+            } else {
+                verdictEl.textContent = "🚨 Significant bias detected — action required before deployment";
+                verdictEl.style.cssText = "display:inline-block;background:var(--red-light);color:#c5221f;";
+            }
 
             // Bias cards
             const cardsContainer = document.getElementById("biasCards");
@@ -1328,7 +1619,25 @@ Provide exactly 4 sections:
             }
 
             resultsEl.scrollIntoView({ behavior: "smooth" });
+
+            // Show download report button
+            document.getElementById('downloadReportBtn').style.display = 'inline-block';
         }
+
+        // PDF Report generation via window.print()
+        function generateReport() {
+            const printDate = document.getElementById('printDate');
+            if (printDate) printDate.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            window.print();
+        }
+        // Expose to onclick
+        window.generateReport = generateReport;
+
+        // Show history link when user is signed in
+        onAuthStateChanged(auth, (user) => {
+            const historyLink = document.getElementById('historyLink');
+            if (historyLink) historyLink.style.display = user ? 'inline-block' : 'none';
+        });
     </script>
 </body>
 

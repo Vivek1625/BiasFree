@@ -68,3 +68,13 @@
 - Resolved Google Cloud API leakage block by extracting the Gemini API key from the public HTML files.
 - Implemented a two-step client-side security architecture utilizing a `.gitignore`d `config.js` file to safely inject sensitive credentials at runtime.
 - Prevented future GitHub secret detection bots from automatically revoking the API key while maintaining a static, serverless deployment architecture.
+
+## Day 13: Presentation Polish & Core Features
+- Implemented robust Markdown parsing for Gemini AI outputs, ensuring plain-English reports render with proper structural elements (`<h3>`, `<strong>`, `<ul>`).
+- Designed and integrated a dynamic, visual fairness score gauge (Red/Yellow/Green) to instantly contextualize numerical analysis.
+- Expanded the auto-detection engine's `SENSITIVE_KEYWORDS` dictionary to include broader HR parameters (e.g., `marital`, `veteran`, `department`, `jobrole`).
+- Refactored `generateFixes()` to synthesize quantitative, dataset-specific remediation strategies (e.g., target resampling ratios) rather than generic advice.
+- Reframed the Gemini LLM prompt to explicitly analyze *dataset* characteristics rather than inferring *model* behavior, aligning with technical accuracy.
+- Built a zero-backend PDF Report Generation tool leveraging CSS `@media print` directives for clean, standalone documentation.
+- Developed an Analysis History dashboard (`history.html`) utilizing Firestore to track historical fairness scores and column-level bias metrics across sessions.
+- Refined public privacy messaging and added a prominent USP to emphasize the project's accessibility.

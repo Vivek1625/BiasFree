@@ -953,7 +953,7 @@
         //  FIREBASE INITIALIZATION
         // ============================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -1475,20 +1475,16 @@ Provide exactly 4 sections:
                 const geminiText = document.getElementById("geminiText");
                 geminiText.textContent = "⏳ Generating AI explanation with Google Gemini...";
 
-                getGeminiExplanation(prompt).then(explanation => {
-                    geminiText.innerHTML = markdownToHTML(explanation);
-                });
-
-                // Step 9: Save to Firestore if logged in
+                // Step 9: Save to Firestore if logged in — capture ref so we can patch it later
+                let firestoreDocRef = null;
                 if (currentUser) {
                     try {
-                        // Compute a top-level bias level for history display
                         const biasKeys = Object.keys(biasResults);
                         let topBiasLevel = 'FAIR';
                         if (biasKeys.some(k => biasResults[k].bias_level === 'HIGH')) topBiasLevel = 'HIGH';
                         else if (biasKeys.some(k => biasResults[k].bias_level === 'MEDIUM')) topBiasLevel = 'MEDIUM';
 
-                        await addDoc(collection(db, "analyses"), {
+                        firestoreDocRef = await addDoc(collection(db, "analyses"), {
                             userId: currentUser.uid,
                             fileName: selectedFile.name,
                             fairnessScore: fairnessScore,
@@ -1514,6 +1510,16 @@ Provide exactly 4 sections:
                         console.warn("Could not save to Firestore:", e);
                     }
                 }
+
+                // Step 10: Fetch Gemini explanation; on success update UI and patch Firestore doc
+                getGeminiExplanation(prompt).then(explanation => {
+                    geminiText.innerHTML = markdownToHTML(explanation);
+                    if (firestoreDocRef) {
+                        updateDoc(firestoreDocRef, { geminiExplanation: explanation }).catch(e =>
+                            console.warn("Could not update Gemini text in Firestore:", e)
+                        );
+                    }
+                });
 
             } catch (error) {
                 console.error("Analysis error:", error);

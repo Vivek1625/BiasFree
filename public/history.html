@@ -293,6 +293,92 @@
             color: var(--text-secondary);
         }
 
+        /* Expand / collapse */
+        .history-card { cursor: pointer; }
+        .expand-icon {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            transition: transform 0.25s;
+            user-select: none;
+        }
+        .history-card.open .expand-icon { transform: rotate(180deg); }
+        .card-expanded {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        .history-card.open .card-expanded { display: block; }
+
+        /* Mini gauge */
+        .mini-gauge-wrap { max-width: 340px; margin: 0 auto 6px; }
+        .mini-gauge {
+            width: 100%; height: 10px; border-radius: 5px;
+            background: linear-gradient(90deg,#EA4335 0%,#EA4335 59%,#FBBC04 60%,#FBBC04 79%,#34A853 80%,#34A853 100%);
+            position: relative; overflow: visible;
+        }
+        .mini-gauge-marker {
+            position: absolute; top: -4px; width: 3px; height: 18px;
+            background: var(--text-primary); border-radius: 2px;
+            transform: translateX(-50%);
+        }
+        .mini-gauge-labels {
+            display: flex; justify-content: space-between;
+            font-size: 10px; color: var(--text-tertiary); font-weight: 600;
+            max-width: 340px; margin: 0 auto 14px;
+        }
+
+        /* Mini bias cards */
+        .mini-bias-card {
+            border-left: 4px solid var(--red);
+            background: rgba(248,249,250,0.8);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .mini-bias-card.medium { border-left-color: var(--yellow); }
+        .mini-bias-card.low    { border-left-color: var(--green); }
+        .mini-bias-card strong { color: var(--text-primary); }
+
+        /* Gemini block */
+        .expanded-gemini {
+            background: linear-gradient(135deg,rgba(232,240,254,.6),rgba(240,244,255,.6));
+            border: 1px solid rgba(66,133,244,.2);
+            border-radius: var(--radius-sm);
+            padding: 16px; margin-top: 14px;
+            font-size: 13px; line-height: 1.7;
+            color: var(--text-primary);
+        }
+        .expanded-gemini h4 { font-size:13px; color:var(--blue); margin:12px 0 4px; }
+        .expanded-gemini h4:first-child { margin-top:0; }
+        .expanded-gemini ul { padding-left:18px; margin-bottom:8px; }
+        .expanded-gemini li { margin-bottom:4px; }
+
+        /* Fixes block */
+        .expanded-fixes {
+            background: rgba(230,244,234,.55);
+            border: 1px solid rgba(52,168,83,.2);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px; margin-top: 10px;
+            font-size: 13px;
+        }
+        .expanded-fixes h4 { color:#137333; font-size:13px; margin-bottom:8px; }
+        .expanded-fixes ul { padding-left:18px; }
+        .expanded-fixes li { margin-bottom:6px; line-height:1.5; }
+
+        /* Delete button */
+        .btn-delete {
+            display: block; margin-top: 14px;
+            background: none; border: 1px solid rgba(234,67,53,.4);
+            color: #c5221f; font-size: 12px; font-weight: 600;
+            font-family: inherit; padding: 6px 14px;
+            border-radius: 16px; cursor: pointer; transition: all .2s;
+        }
+        .btn-delete:hover {
+            background: var(--red-light); border-color: var(--red);
+        }
+
         .footer {
             text-align: center;
             padding: 40px 20px;
@@ -358,7 +444,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -400,45 +486,56 @@
 
         document.getElementById('signInBtnMain')?.addEventListener('click', () => signInWithPopup(auth, provider));
 
+        // Lightweight markdown → HTML for the history expanded view
+        function mdToHTML(text) {
+            if (!text) return '';
+            let h = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            h = h.replace(/^### (.+)$/gm,'<h4>$1</h4>');
+            h = h.replace(/^## (.+)$/gm,'<h4>$1</h4>');
+            h = h.replace(/^# (.+)$/gm,'<h4>$1</h4>');
+            h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+            h = h.replace(/\*(.+?)\*/g,'<em>$1</em>');
+            const lines = h.split('\n');
+            const out = []; let inList = false;
+            for (const line of lines) {
+                const bm = line.match(/^[\*\-] (.+)$/);
+                if (bm) { if (!inList) { out.push('<ul>'); inList=true; } out.push(`<li>${bm[1]}</li>`); }
+                else {
+                    if (inList) { out.push('</ul>'); inList=false; }
+                    const t = line.trim();
+                    if (t && !t.startsWith('<h4>') && !t.startsWith('<ul>') && !t.startsWith('</ul>') && !t.startsWith('<li>'))
+                        out.push(`<p>${t}</p>`);
+                    else if (t) out.push(t);
+                }
+            }
+            if (inList) out.push('</ul>');
+            return out.join('\n');
+        }
+
         async function loadHistory(uid) {
             try {
-                const q = query(
-                    collection(db, "analyses"),
-                    where("userId", "==", uid),
-                    orderBy("timestamp", "desc")
-                );
+                const q = query(collection(db, "analyses"), where("userId", "==", uid));
                 const snapshot = await getDocs(q);
                 loadingState.style.display = 'none';
 
-                if (snapshot.empty) {
-                    emptyState.style.display = 'block';
-                    return;
-                }
+                if (snapshot.empty) { emptyState.style.display = 'block'; return; }
+
+                const docsData = [];
+                snapshot.forEach(d => docsData.push({ id: d.id, ...d.data() }));
+                docsData.sort((a, b) => {
+                    const ta = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : new Date(a.timestamp||0).getTime();
+                    const tb = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : new Date(b.timestamp||0).getTime();
+                    return tb - ta;
+                });
 
                 historyList.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    historyList.appendChild(createHistoryCard(data));
-                });
+                docsData.forEach(data => historyList.appendChild(createHistoryCard(data)));
             } catch (error) {
                 console.error("Error loading history:", error);
                 loadingState.style.display = 'none';
-
-                // Handle missing index error gracefully
-                if (error.code === 'failed-precondition') {
-                    historyList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="icon">⚙️</div>
-                            <p>Setting up database indexes. This may take a few minutes on first use.</p>
-                            <p style="font-size:12px; color: var(--text-tertiary);">Error: ${error.message}</p>
-                        </div>`;
-                } else {
-                    historyList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="icon">⚠️</div>
-                            <p>Could not load history. Please try again.</p>
-                        </div>`;
-                }
+                historyList.innerHTML = error.code === 'failed-precondition'
+                    ? `<div class="empty-state"><div class="icon">⚙️</div><p>Setting up database indexes. Please try again in a moment.</p></div>`
+                    : `<div class="empty-state"><div class="icon">⚠️</div><p>Could not load history. Please try again.</p></div>`;
             }
         }
 
@@ -451,16 +548,16 @@
             const biasLevel = data.biasLevel || (score >= 80 ? 'FAIR' : score >= 60 ? 'MEDIUM' : 'HIGH');
             const badgeClass = biasLevel === 'HIGH' ? 'badge-high' : biasLevel === 'MEDIUM' ? 'badge-medium' : 'badge-fair';
 
-            // Format timestamp
+            // Timestamp
             let dateStr = 'Unknown date';
             if (data.timestamp) {
                 const ts = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
-                dateStr = ts.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                dateStr = ts.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
             }
 
-            // Column results
+            // Summary col tags
             let columnsHTML = '';
-            if (data.columnResults && data.columnResults.length > 0) {
+            if (data.columnResults?.length > 0) {
                 columnsHTML = data.columnResults.map(cr =>
                     `<span class="history-col-tag">${cr.column}: ${cr.bias_level} (DIR ${cr.disparate_impact})</span>`
                 ).join('');
@@ -474,10 +571,71 @@
             const rows = data.datasetSummary?.total_rows ?? '?';
             const outcomeCol = data.datasetSummary?.outcome_column ?? '?';
 
+            // ---- Expanded content ----
+
+            // Mini gauge
+            const gaugeHTML = `
+                <div style="text-align:center;margin-bottom:10px;">
+                    <div class="mini-gauge-wrap">
+                        <div class="mini-gauge">
+                            <div class="mini-gauge-marker" style="left:${score}%"></div>
+                        </div>
+                    </div>
+                    <div class="mini-gauge-labels"><span>0 — High Bias</span><span>60</span><span>80</span><span>100 — Fair</span></div>
+                </div>`;
+
+            // Per-column bias mini cards
+            let biasCardsHTML = '';
+            const findings = data.biasFindings || {};
+            const colResults = data.columnResults || [];
+            const colKeys = colResults.length > 0 ? colResults.map(c => c.column) : Object.keys(findings);
+            for (const colKey of colKeys) {
+                const cr = colResults.find(c => c.column === colKey);
+                const fi = findings[colKey] || {};
+                const bl = (cr?.bias_level || fi.bias_level || 'LOW').toLowerCase();
+                const dir = cr?.disparate_impact ?? fi.disparate_impact_ratio ?? '?';
+                const disadv = cr?.disadvantaged || fi.most_disadvantaged_group || '?';
+                const adv = cr?.advantaged || fi.most_advantaged_group || '?';
+                const badgeCls = bl === 'high' ? 'badge-high' : bl === 'medium' ? 'badge-medium' : 'badge-low';
+                biasCardsHTML += `
+                    <div class="mini-bias-card ${bl}">
+                        <strong>${colKey}</strong>
+                        <span class="history-badge ${badgeCls}" style="margin-left:8px;vertical-align:middle">${bl.toUpperCase()} BIAS</span>
+                        <div style="margin-top:6px;color:var(--text-secondary);font-size:12px;">
+                            DIR: <strong>${dir}</strong> &nbsp;·&nbsp;
+                            Disadvantaged: <strong>${disadv}</strong> &nbsp;·&nbsp;
+                            Advantaged: <strong>${adv}</strong>
+                        </div>
+                    </div>`;
+            }
+
+            // Gemini explanation
+            const geminiHTML = data.geminiExplanation
+                ? `<div class="expanded-gemini">
+                       <strong style="font-size:13px;color:var(--blue);">🤖 Gemini AI Analysis</strong>
+                       <div style="margin-top:10px;">${mdToHTML(data.geminiExplanation)}</div>
+                   </div>`
+                : `<div class="expanded-gemini" style="color:var(--text-tertiary);font-style:italic;">
+                       Gemini AI explanation not available — it may have been saved before this feature was added.
+                   </div>`;
+
+            // Suggested fixes
+            let fixesHTML = '';
+            if (data.suggestedFixes?.length > 0) {
+                fixesHTML = `<div class="expanded-fixes">
+                    <h4>🛠 Suggested Fixes</h4>
+                    <ul>${data.suggestedFixes.map(f => `<li>${f}</li>`).join('')}</ul>
+                </div>`;
+            }
+
+            // ---- Assemble ----
             card.innerHTML = `
                 <div class="history-card-header">
                     <span class="history-filename">📄 ${data.fileName || 'Unknown file'}</span>
-                    <span class="history-date">${dateStr}</span>
+                    <span style="display:flex;align-items:center;gap:8px;">
+                        <span class="history-date">${dateStr}</span>
+                        <span class="expand-icon">▼</span>
+                    </span>
                 </div>
                 <div class="history-score">
                     <div>
@@ -491,9 +649,48 @@
                     <span>🎯 Outcome: ${outcomeCol}</span>
                 </div>
                 ${columnsHTML ? `<div class="history-columns">${columnsHTML}</div>` : ''}
+                <div class="card-expanded">
+                    ${gaugeHTML}
+                    ${biasCardsHTML}
+                    ${geminiHTML}
+                    ${fixesHTML}
+                    <button class="btn-delete" id="del-${data.id}">🗑 Delete this analysis</button>
+                </div>
             `;
+
+            // Toggle expand on click (but not when the delete button is the target)
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.btn-delete')) return;
+                card.classList.toggle('open');
+            });
+
+            // Delete handler
+            const delBtn = card.querySelector(`#del-${data.id}`);
+            if (delBtn) {
+                delBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (!confirm('Delete this analysis? This cannot be undone.')) return;
+                    try {
+                        await deleteDoc(doc(db, 'analyses', data.id));
+                        card.style.transition = 'opacity .3s, max-height .3s';
+                        card.style.opacity = '0';
+                        card.style.maxHeight = '0';
+                        card.style.overflow = 'hidden';
+                        card.style.marginBottom = '0';
+                        setTimeout(() => card.remove(), 320);
+                        if (!historyList.querySelector('.history-card')) {
+                            emptyState.style.display = 'block';
+                        }
+                    } catch (err) {
+                        alert('Could not delete. Please try again.');
+                        console.error(err);
+                    }
+                });
+            }
+
             return card;
         }
+
     </script>
 </body>
 

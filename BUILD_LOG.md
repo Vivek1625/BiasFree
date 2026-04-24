@@ -78,3 +78,9 @@
 - Built a zero-backend PDF Report Generation tool leveraging CSS `@media print` directives for clean, standalone documentation.
 - Developed an Analysis History dashboard (`history.html`) utilizing Firestore to track historical fairness scores and column-level bias metrics across sessions.
 - Refined public privacy messaging and added a prominent USP to emphasize the project's accessibility.
+
+## Day 14 & 15: Documentation, UX Polish, & Diagrams
+- Generated comprehensive technical documentation summarizing the entire project context, API flows, and architecture for final submission.
+- Adjusted UI elements: Removed the hero UN SDG 10 badge and dynamically displayed the SDG messaging only after analysis completes.
+- Improved the unauthenticated user experience by keeping the History navigation link visible and prompting login, instead of hiding the feature entirely.
+- Worked and made architecture diagram, logical order.

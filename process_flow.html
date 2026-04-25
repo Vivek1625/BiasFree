@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BiasFree — Process Flow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #ffffff; display: flex; justify-content: center; padding: 40px; }
+    svg { display: block; background: white; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); }
+    @media print { body { background: white; padding: 0; } svg { box-shadow: none; border-radius: 0; } }
+  </style>
+</head>
+<body>
+<svg width="760" height="966" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+
+  <defs>
+    <filter id="sh" x="-5%" y="-10%" width="115%" height="135%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#00000012"/>
+    </filter>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#94A3B8"/>
+    </marker>
+    <marker id="arr-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#16A34A"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="760" height="1060" fill="white" rx="16"/>
+
+  <!-- Header -->
+  <rect x="0" y="0" width="760" height="70" fill="#0F172A" rx="16"/>
+  <rect x="0" y="54" width="760" height="16" fill="#0F172A"/>
+  <text x="380" y="30" text-anchor="middle" font-size="19" font-weight="800" fill="white">BiasFree — Process Flow</text>
+  <text x="380" y="52" text-anchor="middle" font-size="11" fill="#64748B">User Journey · CSV Upload to Bias Insight · Google Solution Challenge 2026</text>
+
+  <!-- ── STEP 1: User Uploads CSV (dark) ── y=82 cy=114 -->
+  <rect x="190" y="82" width="380" height="64" rx="32" fill="#0F172A" filter="url(#sh)"/>
+  <circle cx="217" cy="114" r="16" fill="rgba(255,255,255,0.12)"/>
+  <text x="217" y="119" text-anchor="middle" font-size="11" font-weight="800" fill="white">1</text>
+  <text x="393" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="white">User Uploads CSV</text>
+  <text x="393" y="128" text-anchor="middle" font-size="10" font-weight="600" fill="#94A3B8">Drag-and-drop or file picker · No data leaves the browser</text>
+
+  <!-- Arrow -->
+  <line x1="380" y1="146" x2="380" y2="166" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 2: CSV Parsed in Browser (blue) ── y=168 cy=200 -->
+  <rect x="190" y="168" width="380" height="64" rx="32" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="217" cy="200" r="16" fill="#1D4ED8"/>
+  <text x="217" y="205" text-anchor="middle" font-size="11" font-weight="800" fill="white">2</text>
+  <text x="393" y="194" text-anchor="middle" font-size="13" font-weight="700" fill="#1D4ED8">CSV Parsed in Browser</text>
+  <text x="393" y="214" text-anchor="middle" font-size="10" font-weight="600" fill="#3B82F6">PapaParse library · Runs 100% client-side · Zero server contact</text>
+
+  <!-- Arrow -->
+  <line x1="380" y1="232" x2="380" y2="252" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 3: Bias Engine Runs (blue) ── y=254 cy=286 -->
+  <rect x="190" y="254" width="380" height="64" rx="32" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="217" cy="286" r="16" fill="#1D4ED8"/>
+  <text x="217" y="291" text-anchor="middle" font-size="11" font-weight="800" fill="white">3</text>
+  <text x="393" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="#1D4ED8">Bias Engine Runs</text>
+  <text x="393" y="300" text-anchor="middle" font-size="10" font-weight="600" fill="#3B82F6">80% Rule · Disparate Impact Ratio per sensitive column</text>
+
+  <!-- Arrow -->
+  <line x1="380" y1="318" x2="380" y2="338" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 4: Fairness Score Calculated (blue) ── y=340 cy=372 -->
+  <rect x="190" y="340" width="380" height="64" rx="32" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="217" cy="372" r="16" fill="#1D4ED8"/>
+  <text x="217" y="377" text-anchor="middle" font-size="11" font-weight="800" fill="white">4</text>
+  <text x="393" y="366" text-anchor="middle" font-size="13" font-weight="700" fill="#1D4ED8">Fairness Score Calculated</text>
+  <text x="393" y="386" text-anchor="middle" font-size="10" font-weight="600" fill="#3B82F6">Mean DIR × 100 · Scored 0–100 · 80+ = Fair, below 60 = High Bias</text>
+
+  <!-- Arrow -->
+  <line x1="380" y1="404" x2="380" y2="424" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 5: Results Rendered on Screen (blue) ── y=426 cy=458 -->
+  <rect x="190" y="426" width="380" height="64" rx="32" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="217" cy="458" r="16" fill="#1D4ED8"/>
+  <text x="217" y="463" text-anchor="middle" font-size="11" font-weight="800" fill="white">5</text>
+  <text x="393" y="452" text-anchor="middle" font-size="13" font-weight="700" fill="#1D4ED8">Results Rendered on Screen</text>
+  <text x="393" y="472" text-anchor="middle" font-size="10" font-weight="600" fill="#3B82F6">Fairness Gauge · Bias Cards · Fix Suggestions — all on one page</text>
+
+  <!-- Arrow -->
+  <line x1="380" y1="490" x2="380" y2="510" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 6: Gemini AI Explanation (yellow) ── y=512 cy=544 -->
+  <rect x="190" y="512" width="380" height="64" rx="32" fill="#FFFBEB" stroke="#FCD34D" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="217" cy="544" r="16" fill="#D97706"/>
+  <text x="217" y="549" text-anchor="middle" font-size="11" font-weight="800" fill="white">6</text>
+  <text x="393" y="538" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">Gemini AI Explanation Generated</text>
+  <text x="393" y="558" text-anchor="middle" font-size="10" font-weight="600" fill="#B45309">Direct REST call · 4-model fallback · Appears inline on results page</text>
+
+  <!-- Arrow -->
+  <line x1="380" y1="576" x2="380" y2="596" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 7: Save to Firestore (green) ── y=598 cy=630 -->
+  <rect x="190" y="598" width="380" height="64" rx="32" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="217" cy="630" r="16" fill="#16A34A"/>
+  <text x="217" y="635" text-anchor="middle" font-size="11" font-weight="800" fill="white">7</text>
+  <text x="393" y="624" text-anchor="middle" font-size="13" font-weight="700" fill="#15803D">Save to Firestore</text>
+  <text x="415" y="644" text-anchor="middle" font-size="10" font-weight="600" fill="#16A34A">Authenticated users only · analyses collection · addDoc() via Firebase SDK</text>
+
+  <!-- Arrow -->
+  <line x1="380" y1="662" x2="380" y2="682" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 8: View in History Dashboard (green) ── y=684 cy=716 -->
+  <rect x="190" y="684" width="380" height="64" rx="32" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="217" cy="716" r="16" fill="#16A34A"/>
+  <text x="217" y="721" text-anchor="middle" font-size="11" font-weight="800" fill="white">8</text>
+  <text x="393" y="710" text-anchor="middle" font-size="13" font-weight="700" fill="#15803D">View in History Dashboard</text>
+  <text x="393" y="730" text-anchor="middle" font-size="10" font-weight="600" fill="#16A34A">history.html · Expandable AI report cards · Past analyses</text>
+
+  <!-- ── LEGEND ── -->
+  <line x1="40" y1="776" x2="720" y2="776" stroke="#E2E8F0" stroke-width="1"/>
+
+  <circle cx="68" cy="798" r="8" fill="#0F172A"/>
+  <text x="82" y="803" font-size="10" font-weight="600" fill="#64748B">User Action</text>
+
+  <circle cx="200" cy="798" r="8" fill="#1D4ED8"/>
+  <text x="214" y="803" font-size="10" font-weight="600" fill="#64748B">Browser / JS Logic</text>
+
+  <circle cx="360" cy="798" r="8" fill="#D97706"/>
+  <text x="374" y="803" font-size="10" font-weight="600" fill="#64748B">Gemini AI</text>
+
+  <circle cx="470" cy="798" r="8" fill="#16A34A"/>
+  <text x="484" y="803" font-size="10" font-weight="600" fill="#64748B">Firebase (Google Cloud)</text>
+
+  <!-- Footer -->
+  <text x="380" y="846" text-anchor="middle" font-size="10" font-weight="600" fill="#CBD5E1">GitHub: Vivek1625/BiasFree  ·  Firebase Project: biasfree-642026  ·  UN SDG Target 10.3</text>
+
+</svg>
+</body>
+</html>

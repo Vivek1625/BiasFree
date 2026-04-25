@@ -84,3 +84,9 @@
 - Adjusted UI elements: Removed the hero UN SDG 10 badge and dynamically displayed the SDG messaging only after analysis completes.
 - Improved the unauthenticated user experience by keeping the History navigation link visible and prompting login, instead of hiding the feature entirely.
 - Worked and made architecture diagram, logical order.
+
+## Day 16: Workflow Visualization & GitHub Sync
+- Redesigned the BiasFree Process Flow diagram to a streamlined linear workflow for a cleaner, professional presentation.
+- Added "Save to Firestore" and "View in History Dashboard" as final workflow steps to accurately reflect system capabilities.
+- Normalized workflow styling elements to match the aesthetic of the main architecture diagram.
+- Cleaned up untracked files and ensured all latest workflow and UI updates were properly committed and pushed to the repository.

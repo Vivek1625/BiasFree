@@ -93,3 +93,8 @@
 
 ## Day 17: Presentation Preparation
 - Started preparing the final presentation pitch deck for the Google Solutions Challenge 2026 submission.
+
+## Day 18: Final Submission Wrap-up
+- Completed the day-18 demo video recording.
+- Polished the presentation (PPT) for final submission.
+- Uploaded the demo video to YouTube.
